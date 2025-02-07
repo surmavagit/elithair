@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type Book struct {
@@ -40,6 +42,16 @@ func main() {
 	server.ListenAndServe()
 }
 
+type DB struct {
+	*sql.DB
+}
+
+func dbConnect() (*DB, error) {
+	var psqlInfo = "host=localhost port=8080 user=elithairuser password=elithairpassword dbname=elithair sslmode=disable"
+	db, err := sql.Open("postgres", psqlInfo)
+	return &DB{db}, err
+}
+
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithError(w, 404, "this is an error")
 }
@@ -51,26 +63,44 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 400, "invalid author id")
 		return
 	}
-	first := Book{
-		Title: "1984",
-		Year:  1949,
-	}
-	second := Book{
-		Title: "Animal Farm",
-		Year:  1945,
-	}
-	orwell := Author{
-		AuthorId:  1,
-		Name:      "George Orwell",
-		Biography: "British writer known for 1984 and Animal Farm.",
-		Books:     []Book{first, second},
+
+	db, err := dbConnect()
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	} else {
+		log.Println("connected to db")
 	}
 
-	if authorId == 1 {
-		respondWithJSON(w, 200, orwell)
-	} else {
+	queryAuthor := "SELECT * FROM author WHERE author.id=1;"
+	//queryBook := "SELECT title, year from book left join attribution on  book_id = book.id WHERE author_id=$1;"
+	rows := db.QueryRow(queryAuthor, authorId)
+	log.Println("db response received")
+	a := Author{}
+	err = rows.Scan(&a.AuthorId, &a.Name, &a.Biography)
+	if err != nil {
 		respondWithError(w, 404, "author not found")
+		db.Close()
+		return
 	}
+
+	//first := Book{
+	//	Title: "1984",
+	//	Year:  1949,
+	//}
+	//second := Book{
+	//	Title: "Animal Farm",
+	//	Year:  1945,
+	//}
+	//orwell := Author{
+	//	AuthorId:  1,
+	//	Name:      "George Orwell",
+	//	Biography: "British writer known for 1984 and Animal Farm.",
+	//	Books:     []Book{first, second},
+	//}
+
+	db.Close()
+	respondWithJSON(w, 200, a)
 }
 
 func middlewareCors(next http.Handler) http.Handler {

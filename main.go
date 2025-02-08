@@ -53,7 +53,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    address,
-		Handler: middlewareCors(r),
+		Handler: r,
 	}
 	fmt.Println("listening on: ", server.Addr)
 	server.ListenAndServe()
@@ -150,19 +150,6 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		author.Books = append(author.Books, b)
 	}
 	respondWithJSON(w, 200, author)
-}
-
-func middlewareCors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

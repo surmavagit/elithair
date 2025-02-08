@@ -1,12 +1,12 @@
 CREATE TABLE book(
-    id int PRIMARY KEY,
-    title char(20),
+    id SERIAL PRIMARY KEY,
+    title varchar(20),
     year int
 );
 
 CREATE TABLE author(
-    id int PRIMARY KEY,
-    name char(40),
+    id SERIAL PRIMARY KEY,
+    name varchar(40),
     biography text
 );
 
@@ -16,13 +16,13 @@ CREATE TABLE attribution(
     PRIMARY KEY(author_id, book_id)
 );
 
-INSERT INTO author VALUES
-(1, 'George Orwell', 'British writer known for 1984 and Animal Farm')
+INSERT INTO author(name, biography) VALUES
+('George Orwell', 'British writer known for 1984 and Animal Farm')
 ;
 
-INSERT INTO book VALUES
-(1, '1984', 1945)
-,(2, 'Animal Farm', 1949)
+INSERT INTO book(title, year) VALUES
+('1984', 1945)
+,('Animal Farm', 1949)
 ;
 
 INSERT INTO attribution VALUES

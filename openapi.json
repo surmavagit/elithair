@@ -1,0 +1,82 @@
+{
+    "openapi": "3.1.1",
+    "info": {
+        "title": "Author Details API",
+        "version": "1"
+    },
+    "paths": {
+        "/authors/{author_id}": {
+            "parameters": [
+                {
+                    "name": "author_id",
+                    "in": "path",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "get": {
+                "summary": "get the details of an author",
+                "responses": {
+                    "400": {
+                        "description": "invalid author id",
+                        "content": {
+                            "application/json":{
+                                "schema": { "$ref": "#/components/schemas/Error" }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "author found",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/Author" }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "author not found",
+                        "content": {
+                            "application/json":{
+                                "schema": { "$ref": "#/components/schemas/Error" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Author":{
+                "type": "object",
+                "required": ["id", "name", "biography"],
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "biography": {"type": "string"},
+                    "books": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/Book" }
+                    }
+                }
+            },
+            "Book":{
+                "type": "object",
+                "required": ["title", "year"],
+                "properties": {
+                    "title": {"type": "string"},
+                    "year": {"type": "integer"}
+                }
+            },
+            "Error":{
+                "type": "object",
+                "required": ["error"],
+                "properties": {
+                    "error": {"type":"string"}
+                }
+            }
+        }
+    }
+}
